@@ -1,7 +1,7 @@
 <?php defined("SYSPATH") or die("No direct script access.");
 /**
  * Gallery - a web based photo album viewer and editor
- * Copyright (C) 2000-2010 Bharat Mediratta
+ * Copyright (C) 2000-2011 Bharat Mediratta
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -95,7 +95,7 @@ class Server_Add_Controller extends Admin_Controller {
       if (server_add::is_valid_path($path)) {
         $entry = ORM::factory("server_add_entry");
         $entry->path = $path;
-        $entry->is_directory = 1;
+        $entry->is_directory = intval(is_dir($path));
         $entry->parent_id = null;
         $entry->task_id = $task->id;
         $entry->save();
@@ -162,11 +162,6 @@ class Server_Add_Controller extends Admin_Controller {
           ->find();
 
         if ($entry->loaded()) {
-          // Ignore the staging directories as directories to be imported.
-          if (!empty($paths[$entry->path])) {
-            $entry->delete();
-          }
-
           $child_paths = glob(preg_quote($entry->path) . "/*");
           if (!$child_paths) {
             $child_paths = glob("{$entry->path}/*");
@@ -291,7 +286,7 @@ class Server_Add_Controller extends Admin_Controller {
           } catch (Exception $e) {
             // This can happen if a photo file is invalid, like a BMP masquerading as a .jpg
             $entry->item_id = 0;
-            $task->log("Skipping invalid file: {$entry->file}");
+            $task->log("Skipping invalid file: {$entry->path}");
           }
         }
 

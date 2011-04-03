@@ -17,5 +17,16 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA  02110-1301, USA.
  */
-class Incoming_Translation_Model_Core extends ORM {
+class encoding_Core {
+  static function convert_to_utf8($value) {
+    if (function_exists("mb_detect_encoding") &&
+        function_exists("mb_convert_encoding") &&
+        mb_detect_encoding($value, "ISO-8859-1, UTF-8") != "UTF-8") {
+      $value = mb_convert_encoding($value, "UTF-8", mb_detect_encoding($value));
+    } else if (function_exists("mb_detect_encoding") &&
+               mb_detect_encoding($value, "ISO-8859-1, UTF-8") != "UTF-8") {
+      $value = utf8_encode($value);
+    }
+    return $value;
+  }
 }

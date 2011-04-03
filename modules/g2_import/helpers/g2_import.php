@@ -1,7 +1,7 @@
 <?php defined("SYSPATH") or die("No direct script access.");
 /**
  * Gallery - a web based photo album viewer and editor
- * Copyright (C) 2000-2010 Bharat Mediratta
+ * Copyright (C) 2000-2011 Bharat Mediratta
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -610,7 +610,7 @@ class g2_import_Core {
         if ($g2_preferred && $g2_preferred instanceof GalleryDerivative) {
           if (preg_match("/rotate\|(-?\d+)/", $g2_preferred->getDerivativeOperations(), $matches)) {
             $tmpfile = tempnam(TMPPATH, "rotate");
-            gallery_graphics::rotate($item->file_path(), $tmpfile, array("degrees" => $matches[1]));
+            gallery_graphics::rotate($item->file_path(), $tmpfile, array("degrees" => $matches[1]), $item);
             $item->set_data_file($tmpfile);
             $item->save();
             unlink($tmpfile);
