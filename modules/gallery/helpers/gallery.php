@@ -18,10 +18,10 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA  02110-1301, USA.
  */
 class gallery_Core {
-  const VERSION = "3.0+";
-  const CODE_NAME = "";
+  const VERSION = "3.0.2";
+  const CODE_NAME = "Coollanta";
   const RELEASE_CHANNEL = "git";
-  const RELEASE_BRANCH = "master";
+  const RELEASE_BRANCH = "3.0.x";
 
   /**
    * If Gallery is in maintenance mode, then force all non-admins to get routed to a "This site is
@@ -193,19 +193,25 @@ class gallery_Core {
    */
   static function version_string() {
     if (gallery::RELEASE_CHANNEL == "git") {
+      $build_number = gallery::build_number();
       return sprintf(
-        "%s (branch %s build %s)", gallery::VERSION, gallery::RELEASE_BRANCH,
-        gallery::build_number());
+        "%s (branch %s, %s)", gallery::VERSION, gallery::RELEASE_BRANCH,
+        $build_number ? " build $build_number" : "unknown build number");
     } else {
       return sprintf("%s (%s)", gallery::VERSION, gallery::CODE_NAME);
     }
   }
 
   /**
-   * Return the contents of the .build_number file, which should be a single integer.
+   * Return the contents of the .build_number file, which should be a single integer
+   * or return null if the .build_number file is missing.
    */
   static function build_number() {
-    $result = parse_ini_file(DOCROOT . ".build_number");
-    return $result["build_number"];
+    $build_file = DOCROOT . ".build_number";
+    if (file_exists($build_file))  {
+      $result = parse_ini_file(DOCROOT . ".build_number");
+      return $result["build_number"];
+    }
+    return null;
   }
 }

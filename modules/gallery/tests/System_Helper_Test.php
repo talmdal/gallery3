@@ -17,30 +17,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA  02110-1301, USA.
  */
-class random_Core {
-  /**
-   * Return a random 32 byte hash value.
-   * @param string extra entropy data
-   */
-  static function hash($entropy="") {
-    return md5($entropy . uniqid(mt_rand(), true));
-  }
-
-  /**
-   * Return a random floating point number between 0 and 1
-   */
-  static function percent() {
-    return ((float)mt_rand()) / (float)mt_getrandmax();
-  }
-
-  /**
-   * Return a random number between $min and $max.  If $min and $max are not specified,
-   * return a random number between 0 and mt_getrandmax()
-   */
-  static function int($min=null, $max=null) {
-    if ($min || $max) {
-      return mt_rand($min, $max);
-    }
-    return mt_rand();
+class System_Helper_Test extends Gallery_Unit_Test_Case {
+  public function temp_filename_test() {
+    $filename = system::temp_filename("file", "ext");
+    $this->assert_true(file_exists($filename), "File not created");
+    unlink($filename);
+    $this->assert_pattern($filename, "|/file.*\\.ext$|");
   }
 }
