@@ -22,7 +22,22 @@ class Tag_Controller extends Controller {
     $tag_id = $function;
     $tag = ORM::factory("tag")->where("id", "=", $tag_id)->find();
     $page_size = module::get_var("gallery", "page_size", 9);
-    $page = (int) Input::instance()->get("page", "1");
+
+    $input = Input::instance();
+    $show = $input->get("show");
+
+    if ($show) {
+      $child = ORM::factory("item", $show);
+      $index = tag::get_position($tag, $child);
+      if ($index) {
+        $page = ceil($index / $page_size);
+      } else {
+        $page = 1;
+      }
+    } else {
+      $page = (int) $input->get("page", "1");
+    }
+
     $children_count = $tag->items_count();
     $offset = ($page-1) * $page_size;
     $max_pages = max(ceil($children_count / $page_size), 1);
@@ -34,6 +49,13 @@ class Tag_Controller extends Controller {
       url::redirect(url::merge(array("page" => $max_pages)));
     }
 
+    $title = t("Tag: %tag_name", array("tag_name" => $tag->name));
+    Photo_Display_Context::factory()
+      ->set_context_callback("tag::get_context")
+      ->set_data(array("tag" => $tag,
+                       "title" => $title))
+      ->save();
+
     $template = new Theme_View("page.html", "collection", "tag");
     $template->set_global(array("page" => $page,
                                 "max_pages" => $max_pages,
@@ -42,7 +64,7 @@ class Tag_Controller extends Controller {
                                 "children" => $tag->items($page_size, $offset),
                                 "children_count" => $children_count));
     $template->content = new View("dynamic.html");
-    $template->content->title = t("Tag: %tag_name", array("tag_name" => $tag->name));
+    $template->content->title = $title;
 
     print $template;
   }
