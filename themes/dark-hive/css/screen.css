@@ -385,9 +385,11 @@ td {
 
 #g-banner {
   background-color: #444444;
+  background-image: url("../../../lib/images/myLogo.png");
+  background-repeat: no-repeat;
   border-bottom: 1px solid #333333;
   color: #ffffff;
-  min-height: 5em;
+  min-height: 10em;
   padding: 1em 20px;
   position: relative;
 }
@@ -496,7 +498,8 @@ td {
 }
 
 #g-login-menu li a {
-  color: #2e7db2 !important;
+  color: #DEDEDE !important;
+  font-weight: bold;
 }
 
 /* Sidebar  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
