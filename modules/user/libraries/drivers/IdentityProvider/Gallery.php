@@ -156,7 +156,7 @@ class IdentityProvider_Gallery_Driver implements IdentityProvider_Driver {
   /**
    * @see IdentityProvider_Driver::remove_user_to_group.
    */
-  public function remove_user_from_group($user, $group) {
+  public function remove_user_from_group($user, $group_id) {
     $group->remove($user);
     $group->save();
   }

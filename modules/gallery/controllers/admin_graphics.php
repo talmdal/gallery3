@@ -40,8 +40,6 @@ class Admin_Graphics_Controller extends Admin_Controller {
       $msg = t("Changed graphics toolkit to: %toolkit", array("toolkit" => $tk->$toolkit_id->name));
       message::success($msg);
       log::success("graphics", $msg);
-
-      module::event("graphics_toolkit_change", $toolkit_id);
     }
 
     url::redirect("admin/graphics");

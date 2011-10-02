@@ -39,7 +39,7 @@ class Tag_Model_Core extends ORM {
   public function items($limit=null, $offset=null, $where=array()) {
     if (is_scalar($where)) {
       // backwards compatibility
-     $where = array(array("items.type", "=", $where));
+      $where = array(array("items.type", "=", $type));
     }
     return ORM::factory("item")
       ->viewable()
@@ -58,7 +58,7 @@ class Tag_Model_Core extends ORM {
   public function items_count($where=array()) {
     if (is_scalar($where)) {
       // backwards compatibility
-      $where = array(array("items.type", "=", $where));
+      $where = array(array("items.type", "=", $type));
     }
     return $model = ORM::factory("item")
       ->viewable()

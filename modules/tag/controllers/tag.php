@@ -49,47 +49,23 @@ class Tag_Controller extends Controller {
       url::redirect(url::merge(array("page" => $max_pages)));
     }
 
-    $root = item::root();
+    $title = t("Tag: %tag_name", array("tag_name" => $tag->name));
+    Photo_Display_Context::factory()
+      ->set_context_callback("tag::get_context")
+      ->set_data(array("tag" => $tag,
+                       "title" => $title))
+      ->save();
+
     $template = new Theme_View("page.html", "collection", "tag");
-    $template->set_global(
-      array("page" => $page,
-            "max_pages" => $max_pages,
-            "page_size" => $page_size,
-            "tag" => $tag,
-            "children" => $tag->items($page_size, $offset),
-            "breadcrumbs" => array(
-              Breadcrumb::instance($root->title, $root->url())->set_first(),
-              Breadcrumb::instance(t("Tag: %tag_name", array("tag_name" => $tag->name)),
-                                   $tag->url())->set_last()),
-            "children_count" => $children_count));
+    $template->set_global(array("page" => $page,
+                                "max_pages" => $max_pages,
+                                "page_size" => $page_size,
+                                "tag" => $tag,
+                                "children" => $tag->items($page_size, $offset),
+                                "children_count" => $children_count));
     $template->content = new View("dynamic.html");
-    $template->content->title = t("Tag: %tag_name", array("tag_name" => $tag->name));
+    $template->content->title = $title;
+
     print $template;
-
-    item::set_display_context_callback("Tag_Controller::get_display_context", $tag->id);
-  }
-
-  static function get_display_context($item, $tag_id) {
-    $tag = ORM::factory("tag", $tag_id);
-    $where = array(array("type", "!=", "album"));
-
-    $position = tag::get_position($tag, $item, $where);
-    if ($position > 1) {
-      list ($previous_item, $ignore, $next_item) = $tag->items(3, $position - 2, $where);
-    } else {
-      $previous_item = null;
-      list ($next_item) = $tag->items(1, $position, $where);
-    }
-
-    $root = item::root();
-    return array("position" => $position,
-                 "previous_item" => $previous_item,
-                 "next_item" => $next_item,
-                 "sibling_count" => $tag->items_count($where),
-                 "breadcrumbs" => array(
-                   Breadcrumb::instance($root->title, $root->url())->set_first(),
-                   Breadcrumb::instance(t("Tag: %tag_name", array("tag_name" => $tag->name)),
-                                        $tag->url("show={$item->id}")),
-                   Breadcrumb::instance($item->title, $item->url())->set_last()));
   }
 }
