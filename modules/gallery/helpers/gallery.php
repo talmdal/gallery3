@@ -18,10 +18,10 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA  02110-1301, USA.
  */
 class gallery_Core {
-  const VERSION = "3.0.2";
-  const CODE_NAME = "Coollanta";
+  const VERSION = "3.0+";
+  const CODE_NAME = "";
   const RELEASE_CHANNEL = "git";
-  const RELEASE_BRANCH = "3.0.x";
+  const RELEASE_BRANCH = "master";
 
   /**
    * If Gallery is in maintenance mode, then force all non-admins to get routed to a "This site is
