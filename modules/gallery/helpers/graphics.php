@@ -1,7 +1,7 @@
 <?php defined("SYSPATH") or die("No direct script access.");
 /**
  * Gallery - a web based photo album viewer and editor
- * Copyright (C) 2000-2011 Bharat Mediratta
+ * Copyright (C) 2000-2012 Bharat Mediratta
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -229,7 +229,6 @@ class graphics_Core {
     return db::build()
       ->from("items")
       ->and_open()
-      ->and_open()
       ->where("thumb_dirty", "=", 1)
       ->and_open()
       ->where("type", "<>", "album")
@@ -239,8 +238,6 @@ class graphics_Core {
       ->where("resize_dirty", "=", 1)
       ->where("type", "=", "photo")
       ->close()
-      ->close()
-      ->where("id", "<>", 1)
       ->close();
   }
 
