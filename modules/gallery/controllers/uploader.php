@@ -1,7 +1,7 @@
 <?php defined("SYSPATH") or die("No direct script access.");
 /**
  * Gallery - a web based photo album viewer and editor
- * Copyright (C) 2000-2012 Bharat Mediratta
+ * Copyright (C) 2000-2013 Bharat Mediratta
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ class Uploader_Controller extends Controller {
 
     if ($form->validate() && $file_validation->validate()) {
       $temp_filename = upload::save("Filedata");
-      Event::add("system.shutdown", create_function("", "unlink(\"$temp_filename\");"));
+      system::delete_later($temp_filename);
       try {
         $item = ORM::factory("item");
         $item->name = substr(basename($temp_filename), 10);  // Skip unique identifier Kohana adds
@@ -65,7 +65,7 @@ class Uploader_Controller extends Controller {
 
         $path_info = @pathinfo($temp_filename);
         if (array_key_exists("extension", $path_info) &&
-            in_array(strtolower($path_info["extension"]), array("flv", "mp4", "m4v"))) {
+            legal_file::get_movie_extensions($path_info["extension"])) {
           $item->type = "movie";
           $item->save();
           log::success("content", t("Added a movie"),
@@ -104,8 +104,8 @@ class Uploader_Controller extends Controller {
       // The "errors" won't be properly pluralized :-/
       print t2("Uploaded %count photo (%error errors)",
                "Uploaded %count photos (%error errors)",
-               $success_count,
-               array("error" => $error_count));
+               (int)$success_count,
+               array("error" => (int)$error_count));
     } else {
       print t2("Uploaded %count photo", "Uploaded %count photos", $success_count);}
   }

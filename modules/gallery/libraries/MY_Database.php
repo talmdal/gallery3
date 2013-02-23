@@ -1,7 +1,7 @@
 <?php defined("SYSPATH") or die("No direct script access.");
 /**
  * Gallery - a web based photo album viewer and editor
- * Copyright (C) 2000-2012 Bharat Mediratta
+ * Copyright (C) 2000-2013 Bharat Mediratta
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +32,9 @@ abstract class Database extends Database_Core {
       $config["connection"]["params"] = null;
     }
     parent::__construct($config);
+    if (gallery::show_profiler()) {
+      $this->config['benchmark'] = true;
+    }
   }
 
   /**
@@ -58,21 +61,21 @@ abstract class Database extends Database_Core {
       $open_brace = strpos($sql, "{") + 1;
       $close_brace = strpos($sql, "}", $open_brace);
       $name = substr($sql, $open_brace, $close_brace - $open_brace);
-      $this->_table_names["{{$name}}"] = "{$prefix}$name";
+      $this->_table_names["{{$name}}"] = "`{$prefix}$name`";
     } else if (strpos($sql, "RENAME TABLE") === 0) {
       // Renaming a table; add it to the table cache.
       // You must use the form "TO {new_table_name}" exactly for this to work.
       $open_brace = strpos($sql, "TO {") + 4;
       $close_brace = strpos($sql, "}", $open_brace);
       $name = substr($sql, $open_brace, $close_brace - $open_brace);
-      $this->_table_names["{{$name}}"] = "{$prefix}$name";
+      $this->_table_names["{{$name}}"] = "`{$prefix}$name`";
     }
 
     if (!isset($this->_table_names)) {
       // This should only run once on the first query
       $this->_table_names = array();
       foreach($this->list_tables() as $table_name) {
-        $this->_table_names["{{$table_name}}"] = $prefix . $table_name;
+        $this->_table_names["{{$table_name}}"] = "`{$prefix}{$table_name}`";
       }
     }
 
@@ -84,5 +87,15 @@ abstract class Database extends Database_Core {
    */
   static function set_default_instance($db) {
     self::$instances["default"] = $db;
+  }
+
+  /**
+   * Escape LIKE queries, add wildcards.  In MySQL queries using LIKE, _ and % characters are
+   * treated as wildcards similar to ? and *, respectively.  Therefore, we need to escape _, %,
+   * and \ (the escape character itself).
+   */
+  static function escape_for_like($value) {
+    // backslash must go first to avoid double-escaping
+    return addcslashes($value, '\_%');
   }
 }

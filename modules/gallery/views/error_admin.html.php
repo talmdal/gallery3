@@ -3,6 +3,7 @@
 <? if (!function_exists("t")) { function t($msg) { return $msg; } } ?>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <style type="text/css">
       body {
         background: #fff;
@@ -169,7 +170,7 @@
       <p>
         There's an error message below and you can find more details
         in gallery3/var/logs (look for the file with the most recent
-        date on it).  Stuck?  Stop by the <a href="http://gallery.menalto.com/forum/96">Gallery 3
+        date on it).  Stuck?  Stop by the <a href="http://galleryproject.org/forum/96">Gallery 3
         Forums</a> and ask for help.  You can also look at our list
         of <a href="http://sourceforge.net/apps/trac/gallery/roadmap">open
         tickets</a> to see if the problem you're seeing has been
@@ -184,7 +185,7 @@
             <?= $type?> [ <?= $code ?> ]:
           </span>
           <span class="message">
-            <?= $message?>
+            <?= html::purify($message) ?>
           </span>
         </h3>
         <div id="<?= $error_id ?>" class="content">

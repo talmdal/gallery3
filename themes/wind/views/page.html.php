@@ -10,11 +10,11 @@
         <?= $page_title ?>
       <? else: ?>
         <? if ($theme->item()): ?>
-          <?= $theme->item()->title ?>
+          <?= html::purify($theme->item()->title) ?>
         <? elseif ($theme->tag()): ?>
           <?= t("Photos tagged with %tag_title", array("tag_title" => $theme->tag()->name)) ?>
         <? else: /* Not an item, not a tag, no page_title specified.  Help! */ ?>
-          <?= item::root()->title ?>
+          <?= html::purify(item::root()->title) ?>
         <? endif ?>
       <? endif ?>
     </title>
@@ -130,7 +130,7 @@
           </div>
         </div>
         <div id="g-sidebar" class="yui-b">
-          <? if ($theme->page_subtype != "login"): ?>
+          <? if (!in_array($theme->page_subtype, array("login", "error"))): ?>
           <?= new View("sidebar.html") ?>
           <? endif ?>
         </div>

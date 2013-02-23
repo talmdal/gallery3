@@ -1,7 +1,7 @@
 <?php defined("SYSPATH") or die("No direct script access.");
 /**
  * Gallery - a web based photo album viewer and editor
- * Copyright (C) 2000-2012 Bharat Mediratta
+ * Copyright (C) 2000-2013 Bharat Mediratta
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -106,7 +106,7 @@ class Database_Test extends Gallery_Unit_Test_Case {
                    PRIMARY KEY (`id`),
                    UNIQUE KEY(`name`))
                  ENGINE=InnoDB DEFAULT CHARSET=utf8");
-    $expected = "CREATE TABLE IF NOT EXISTS g_test (
+    $expected = "CREATE TABLE IF NOT EXISTS `g_test` (
                    `id` int(9) NOT NULL auto_increment,
                    `name` varchar(32) NOT NULL,
                    PRIMARY KEY (`id`),
@@ -121,9 +121,9 @@ class Database_Test extends Gallery_Unit_Test_Case {
         "  AND `right_ptr` <= 6)";
     $sql = $db->add_table_prefixes($sql);
 
-    $expected = "UPDATE g_test SET `name` = '{test string}' " .
+    $expected = "UPDATE `g_test` SET `name` = '{test string}' " .
         "WHERE `item_id` IN " .
-        "  (SELECT `id` FROM g_test " .
+        "  (SELECT `id` FROM `g_test` " .
         "  WHERE `left_ptr` >= 1 " .
         "  AND `right_ptr` <= 6)";
 
@@ -133,7 +133,7 @@ class Database_Test extends Gallery_Unit_Test_Case {
   function prefix_replacement_for_rename_table_test() {
     $db = Database::instance("mock");
     $this->assert_same(
-      "RENAME TABLE g_test TO g_new_test",
+      "RENAME TABLE `g_test` TO `g_new_test`",
       $db->add_table_prefixes("RENAME TABLE {test} TO {new_test}"));
   }
 
@@ -146,6 +146,12 @@ class Database_Test extends Gallery_Unit_Test_Case {
       ->compile();
     $sql = str_replace("\n", " ", $sql);
     $this->assert_same("UPDATE [test_tables] SET [name] = [Test Name] WHERE [1] = [1]", $sql);
+  }
+
+  function escape_for_like_test() {
+    // Note: literal double backslash is written as \\\
+    $this->assert_same('basic\_test', Database::escape_for_like("basic_test"));
+    $this->assert_same('\\\100\%\_test/', Database::escape_for_like('\100%_test/'));
   }
 }
 

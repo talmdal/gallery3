@@ -1,7 +1,7 @@
 <?php defined("SYSPATH") or die("No direct script access.");
 /**
  * Gallery - a web based photo album viewer and editor
- * Copyright (C) 2000-2012 Bharat Mediratta
+ * Copyright (C) 2000-2013 Bharat Mediratta
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@ class Organize_Controller extends Controller {
       "sort_column" => $album->sort_column,
       "sort_order" => $album->sort_order,
       "editable" => access::can("edit", $album),
-      "title" => $album->title,
+      "title" => (string)html::clean($album->title),
       "children" => array());
 
     foreach ($album->viewable()->children() as $child) {
@@ -67,7 +67,7 @@ class Organize_Controller extends Controller {
         "width" => $dims[1],
         "height" => $dims[0],
         "type" => $child->type,
-        "title" => $child->title);
+        "title" => (string)html::clean($child->title));
     }
     json::reply($data);
   }
@@ -81,6 +81,9 @@ class Organize_Controller extends Controller {
 
     foreach (explode(",", $input->post("source_ids")) as $source_id) {
       $source = ORM::factory("item", $source_id);
+      if (!$source->loaded()) {
+        continue;
+      }
       access::required("edit", $source->parent());
 
       if ($source->contains($new_parent) || $source->id == $new_parent->id) {
@@ -116,17 +119,18 @@ class Organize_Controller extends Controller {
 
     $input = Input::instance();
     $target = ORM::factory("item", $input->post("target_id"));
+    if (!$target->loaded()) {
+      json::reply(null);
+      return;
+    }
+
     $album = $target->parent();
     access::required("edit", $album);
 
     if ($album->sort_column != "weight") {
       // Force all the weights into the current order before changing the order to manual
-      $weight = 0;
-      foreach ($album->children() as $child) {
-        $child->weight = ++$weight;
-        $child->save();
-      }
-
+      // @todo: consider making this a trigger in the Item_Model.
+      item::resequence_child_weights($album);
       $album->sort_column = "weight";
       $album->sort_order = "ASC";
       $album->save();
@@ -150,7 +154,7 @@ class Organize_Controller extends Controller {
       // Move all the source items to the right spots.
       for ($i = 0; $i < count($source_ids); $i++) {
         $source = ORM::factory("item", $source_ids[$i]);
-        if ($source->parent_id = $album->id) {
+        if ($source->parent_id == $album->id) {
           $source->weight = $base_weight + $i;
           $source->save();
         }
@@ -174,6 +178,28 @@ class Organize_Controller extends Controller {
     json::reply(null);
   }
 
+  function tag() {
+    access::verify_csrf();
+    $input = Input::instance();
+
+    foreach (explode(",", $input->post("item_ids")) as $item_id) {
+      $item = ORM::factory("item", $item_id);
+      if (access::can("edit", $item)) {
+        // Assuming the user can view/edit the current item, loop
+        // through each tag that was submitted and apply it to
+        // the current item.
+        foreach (explode(",", $input->post("tag_names")) as $tag_name) {
+          $tag_name = trim($tag_name);
+          if ($tag_name) {
+            tag::add($item, $tag_name);
+          }
+        }
+      }
+    }
+
+    json::reply(null);
+  }
+
   private function _get_tree($item, $selected) {
     $tree = array();
     $children = $item->viewable()
@@ -187,7 +213,7 @@ class Organize_Controller extends Controller {
         "expandable" => false,
         "id" => $child->id,
         "leaf" => $child->children_count(array(array("type", "=", "album"))) == 0,
-        "text" => $child->title,
+        "text" => (string)html::clean($child->title),
         "nodeType" => "async");
 
       // If the child is in the selected path, open it now.  Else, mark it async.
